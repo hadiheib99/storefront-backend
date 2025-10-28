@@ -1,20 +1,19 @@
 {
+  "defaultEnv": "dev",
   "dev": {
     "driver": "pg",
     "host": "127.0.0.1",
-    "port": 5432,
+    "port": 5433,
     "database": "store_dev",
     "user": "store_user",
-    "password": "store_pass",
-    "ssl": false
+    "password": "store_pass"
   },
   "test": {
     "driver": "pg",
     "host": "127.0.0.1",
-    "port": 5432,
+    "port": 5433,
     "database": "store_test",
     "user": "store_user",
-    "password": "store_pass",
-    "ssl": false
+    "password": "store_pass"
   }
 }

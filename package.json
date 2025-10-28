@@ -4,29 +4,52 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "node src/server.ts",
-    "watch": "tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess \"node ./dist/server.js\"",
-    "test": "jasmine-ts",
-    "tsc": "tsc"
+    "start": "npx ts-node ./src/server.ts",
+    "dev": "nodemon --watch src --exec ts-node src/server.ts",
+    "build": "tsc",
+    "test": "npm run build && db-migrate --env test up && jasmine",
+    "test:crud": "jasmine --config=spec/support/jasmine.json --require=ts-node/register spec/crudSpec.ts",
+    "test:demo": "jasmine --config=spec/support/jasmine.json --require=ts-node/register spec/demoSpec.ts",
+    "test:watch": "nodemon --watch src --watch spec --ext ts --exec \"npm test\"",
+    "demo": "ts-node ./src/demo.ts",
+    "migrate:dev": "db-migrate --env dev up",
+    "migrate:test": "db-migrate --env test up",
+    "migrate:dev:down": "db-migrate --env dev down",
+    "migrate:test:down": "db-migrate --env test down",
+    "migrate:reset:dev": "db-migrate --env dev reset && db-migrate --env dev up",
+    "migrate:reset:test": "db-migrate --env test reset && db-migrate --env test up",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "setup": "docker-compose up -d && npm run migrate:dev && npm run migrate:test"
   },
   "author": "Udacity",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "pg": "^8.5.1",
-    "typescript": "^4.1.3"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/dotenv": "^6.1.1",
     "@types/express": "^4.17.9",
-    "@types/jasmine": "^3.6.3",
+    "@types/jasmine": "^3.10.18",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.9.1",
     "@types/pg": "^7.14.7",
+    "cross-env": "^10.1.0",
     "db-migrate": "^0.11.14",
     "db-migrate-pg": "^1.5.2",
     "jasmine": "^3.6.4",
     "jasmine-spec-reporter": "^6.0.0",
     "jasmine-ts": "^0.3.0",
+    "nodemon": "^3.1.10",
     "ts-node": "^9.1.1",
-    "tsc-watch": "^4.2.9"
+    "tsc-watch": "^4.2.9",
+    "typescript": "^5.9.3"
   }
 }
