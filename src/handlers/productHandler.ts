@@ -23,12 +23,17 @@ export const index = async (
 };
 
 export const show = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const p = await products.show(Number(req.params.id));
-    res.json(p);
-  } catch (err) {
-    next(err);
-  }
+   try {
+     const id = Number(req.params.id);
+     if (!Number.isFinite(id)) {
+       return res.status(400).json({ error: "Invalid product id" });
+     }
+     const p = await products.show(id);
+     if (!p) return res.status(404).json({ error: "Not found" });
+     res.json(p);
+   } catch (err) {
+     next(err);
+   }
 };
 
 export const create = async (
@@ -37,6 +42,10 @@ export const create = async (
   next: NextFunction
 ) => {
   try {
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ error: "Invalid product id" });
+    }
     const p = await products.create(req.body);
     res.status(201).json(p);
   } catch (err) {
@@ -49,8 +58,11 @@ export const destroy = async (
   next: NextFunction
 ) => {
   try {
-    // If your store method is named `remove` or `destroy`, use that name instead of `delete`.
-    await products.destroy(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ error: "Invalid product id" });
+    }
+    await products.destroy(id);
     res.status(204).end();
   } catch (err) {
     next(err);

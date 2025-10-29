@@ -21,7 +21,13 @@ type UserAuthBody = {
 
 const destroy = async (req: Request, res: Response) => {
   try {
-    await store.destroy(Number(req.params.id));
+    const id = Number(req.params.id);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ error: "Invalid user id" });
+    }
+
+    
+    await store.destroy(id);
     res.status(204).end();
   } catch (err: any) {
     res.status(500).json({ error: err.message });

@@ -13,6 +13,14 @@ export async function resetDatabase(): Promise<void> {
   }
 }
 
+let poolClosed = false;
+
 export async function closeDatabase(): Promise<void> {
-  await db.end();
+  if (poolClosed) return;
+  poolClosed = true;
+  try {
+    await db.end();
+  } catch {
+    // swallow if already ended
+  }
 }
