@@ -1,7 +1,7 @@
 {
   "spec_dir": "spec",
   "spec_files": ["**/*.spec.ts"],
-  "helpers": ["../node_modules/ts-node/register/index.js"],
+  "helpers": ["../../node_modules/ts-node/register/index.js"],
   "stopSpecOnExpectationFailure": false,
   "random": false
 }
