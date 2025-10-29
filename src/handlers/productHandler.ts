@@ -1,40 +1,62 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { authenticateToken } from "../middleware/auth";
 import { ProductStore } from "../models/productModel";
 
-const store = new ProductStore();
+const products = new ProductStore();
 
-const index = async (_req: Request, res: Response) => {
+type ProductCreateBody = {
+  name: string;
+  price: number;
+  category?: string | null;
+};
+export const index = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const products = await store.index();
-    res.json({ products });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const rows = await products.index();
+    res.json(rows);
+  } catch (err) {
+    next(err);
   }
 };
 
-const show = async (req: Request, res: Response) => {
+export const show = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = Number(req.params.id);
-    const prod = await store.show(id);
-    res.json({ product: prod });
-  } catch (err: any) {
-    res.status(404).json({ error: err.message });
+    const p = await products.show(Number(req.params.id));
+    res.json(p);
+  } catch (err) {
+    next(err);
   }
 };
 
-const create = async (req: Request, res: Response) => {
+export const create = async (
+  req: Request<{ id: string }, {}, ProductCreateBody, {}>,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { name, price, category } = req.body;
-    if (!name || price === undefined) {
-      return res.status(400).json({ error: "name and price are required" });
-    }
-    const created = await store.create({ name, price: Number(price), category });
-    res.status(201).json({ product: created });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    const p = await products.create(req.body);
+    res.status(201).json(p);
+  } catch (err) {
+    next(err);
   }
 };
+export const destroy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // If your store method is named `remove` or `destroy`, use that name instead of `delete`.
+    await products.destroy(Number(req.params.id));
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 const productRouter = (app: express.Application) => {
   app.get("/products", index);                 // public

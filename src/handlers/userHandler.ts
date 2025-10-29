@@ -1,9 +1,23 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response, NextFunction } from "express";
+
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../middleware/auth";
 import { UserStore } from "../models/userModel";
 
 const store = new UserStore();
+
+type UserCreateBody = {
+  firstname: string;
+  lastname: string;
+  email: string;
+  password: string;
+};
+
+type UserAuthBody = {
+  email: string;
+  password: string;
+};
 
 const destroy = async (req: Request, res: Response) => {
   try {
@@ -14,45 +28,54 @@ const destroy = async (req: Request, res: Response) => {
   }
 };
 
-const index = async (_req: Request, res: Response) => {
-  const users = await store.index();
-  res.json({ users });
-};
+export const index = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+  ) => {
+       try {
+        const list = await store.index();
+        res.json(list);
+      } catch (err) {
+        next(err);
+      }
+    };
 
-const show = async (req: Request, res: Response) => {
-  const user = await store.show(Number(req.params.id));
-  res.json({ user });
-};
-
-const create = async (req: Request, res: Response) => {
+export const show = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
-    const created = await store.create({
-      firstname,
-      lastname,
-      email,
-      password,
-    });
-    const token = jwt.sign({ user: created }, process.env.JWT_SECRET as string);
-    res.status(201).json({ user: created, token });
-  } catch (err: any) {
-    // Check for duplicate email error
-    if (
-      err.message.includes("duplicate key") &&
-      err.message.includes("users_email_key")
-    ) {
-      return res.status(409).json({ error: "Email already exists" });
-    }
-    res.status(500).json({ error: err.message });
+    const u = await store.show(Number(req.params.id));
+    res.json(u);
+  } catch (err) {
+    next(err);
   }
 };
 
-const authenticate = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  const user = await store.authenticate(email, password);
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
-  const token = jwt.sign({ user }, process.env.JWT_SECRET as string);
-  res.json({ user, token });
+export const create = async (
+  req: Request<unknown, unknown, UserCreateBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const created = await store.create(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const authenticate = async (
+  req: Request<unknown, unknown, UserAuthBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, password } = req.body;
+    const u = await store.authenticate(email, password);
+    res.json(u);
+  } catch (err) {
+    next(err);
+  }
 };
 
 const userRouter = (app: express.Application) => {
