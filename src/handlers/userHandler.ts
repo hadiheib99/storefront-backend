@@ -26,7 +26,6 @@ const destroy = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Invalid user id" });
     }
 
-    
     await store.destroy(id);
     res.status(204).end();
   } catch (err: any) {
@@ -38,14 +37,14 @@ export const index = async (
   _req: Request,
   res: Response,
   next: NextFunction
-  ) => {
-       try {
-        const list = await store.index();
-        res.json(list);
-      } catch (err) {
-        next(err);
-      }
-    };
+) => {
+  try {
+    const list = await store.index();
+    res.json(list);
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const show = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -63,12 +62,18 @@ export const create = async (
 ) => {
   try {
     const created = await store.create(req.body);
-    res.status(201).json(created);
+
+    // Generate JWT token for the new user
+    const secret = process.env.JWT_SECRET || "supersecret";
+    const token = jwt.sign({ sub: created.id, email: created.email }, secret, {
+      expiresIn: "1h",
+    });
+
+    res.status(201).json({ user: created, token });
   } catch (err) {
     next(err);
   }
 };
-
 
 export const authenticate = async (
   req: Request<unknown, unknown, UserAuthBody>,
@@ -78,7 +83,18 @@ export const authenticate = async (
   try {
     const { email, password } = req.body;
     const u = await store.authenticate(email, password);
-    res.json(u);
+
+    if (!u) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Generate JWT token
+    const secret = process.env.JWT_SECRET || "supersecret";
+    const token = jwt.sign({ sub: u.id, email: u.email }, secret, {
+      expiresIn: "1h",
+    });
+
+    res.json({ user: u, token });
   } catch (err) {
     next(err);
   }

@@ -16,7 +16,7 @@ describe("Products Endpoints", () => {
     const create = await request(app)
       .post("/products")
       .set("Authorization", `Bearer ${token}`)
-      .send({ name: "Notebook", price: 12.5, category: "stationery" });
+      .send({ name: "Notebook", price: Number(12.5), category: "stationery" });
 
     expect(create.status).toBe(201);
     productId = Number(create.body?.id);

@@ -82,8 +82,9 @@ export class OrderStore {
     const conn = await db.connect();
     try {
       const sql =
-        "INSERT INTO orders (user_id, status) VALUES ($1, COALESCE($2, 'active')) RETURNING id, user_id, status, created_at";
+        "INSERT INTO orders (user_id, status) VALUES($1, $2::order_status) RETURNING id, user_id, status";
       const params: [number, "active" | "complete" | null] = [
+      
         o.user_id,
         o.status ?? null,
       ];

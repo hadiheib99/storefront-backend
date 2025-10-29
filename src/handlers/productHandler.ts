@@ -23,29 +23,25 @@ export const index = async (
 };
 
 export const show = async (req: Request, res: Response, next: NextFunction) => {
-   try {
-     const id = Number(req.params.id);
-     if (!Number.isFinite(id)) {
-       return res.status(400).json({ error: "Invalid product id" });
-     }
-     const p = await products.show(id);
-     if (!p) return res.status(404).json({ error: "Not found" });
-     res.json(p);
-   } catch (err) {
-     next(err);
-   }
-};
-
-export const create = async (
-  req: Request<{ id: string }, {}, ProductCreateBody, {}>,
-  res: Response,
-  next: NextFunction
-) => {
   try {
     const id = Number(req.params.id);
     if (!Number.isFinite(id)) {
       return res.status(400).json({ error: "Invalid product id" });
     }
+    const p = await products.show(id);
+    if (!p) return res.status(404).json({ error: "Not found" });
+    res.json(p);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const create = async (
+  req: Request<{}, {}, ProductCreateBody, {}>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const p = await products.create(req.body);
     res.status(201).json(p);
   } catch (err) {
@@ -69,11 +65,11 @@ export const destroy = async (
   }
 };
 
-
 const productRouter = (app: express.Application) => {
-  app.get("/products", index);                 // public
-  app.get("/products/:id", show);              // public
+  app.get("/products", index); // public
+  app.get("/products/:id", show); // public
   app.post("/products", authenticateToken, create); // protected
+  app.delete("/products/:id", authenticateToken, destroy); // protected
 };
 
 export default productRouter;

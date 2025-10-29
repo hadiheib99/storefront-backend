@@ -6,7 +6,6 @@ import { OrderProductStore } from "../models/orderProductModel";
 const orders = new OrderStore();
 const orderProducts = new OrderProductStore();
 
-
 type OrderCreateBody = {
   user_id: number;
   status?: "active" | "complete";
@@ -57,20 +56,21 @@ export const addProduct = async (
   res: Response,
   next: NextFunction
 ) => {
-  
   try {
     const order_id = Number(req.params.id);
     const { product_id, quantity } = req.body;
     if (!product_id || quantity === undefined) {
-      return res.status(400).json({ error: "product_id and quantity are required" });
-      }
-    
+      return res
+        .status(400)
+        .json({ error: "product_id and quantity are required" });
+    }
+
     const added = await orderProducts.add({
       order_id,
       product_id: Number(product_id),
       quantity: Number(quantity),
     });
-    res.status(201).json({ order_product: added });
+    res.status(201).json(added);
   } catch (err) {
     next(err);
   }
@@ -86,6 +86,8 @@ const currentByUser = async (req: Request, res: Response) => {
 };
 
 const orderRouter = (app: express.Application) => {
+  app.get("/orders", authenticateToken, index);
+  app.get("/orders/:id", authenticateToken, show);
   app.post("/orders", authenticateToken, create);
   app.get("/users/:user_id/orders/current", authenticateToken, currentByUser);
   app.post("/orders/:id/products", authenticateToken, addProduct);
