@@ -5,8 +5,9 @@
   "main": "server.ts",
   "scripts": {
     "pretest": "cross-env ENV=test db-migrate --env test up",
-    "start": "npx ts-node ./src/server.ts",
-    "dev": "nodemon --watch src --exec ts-node src/server.ts",
+    "start": "ts-node ./src/server.ts",
+    "dev": "cross-env ENV=dev nodemon",
+    "dev:fast": "cross-env ENV=dev ts-node --transpile-only src/server.ts",
     "lint": "eslint \"src/**/*.{ts,tsx,js}\" --fix",
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && jasmine --config=spec/support/jasmine.json",
